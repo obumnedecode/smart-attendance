@@ -1,5 +1,6 @@
 {
   "/api/admin/course-requests/route": "app/api/admin/course-requests/route.js",
+  "/api/attendance/record/route": "app/api/attendance/record/route.js",
   "/api/auth/login/route": "app/api/auth/login/route.js",
   "/api/auth/logout/route": "app/api/auth/logout/route.js",
   "/api/auth/me/route": "app/api/auth/me/route.js",

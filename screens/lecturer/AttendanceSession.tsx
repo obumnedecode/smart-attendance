@@ -12,7 +12,29 @@ interface AttendanceSessionProps {
 const AttendanceSession: React.FC<AttendanceSessionProps> = ({ course, settings, onEndSession }) => {
   const [timeLeft, setTimeLeft] = useState(settings.duration * 60);
   const [qrValue, setQrValue] = useState(`${course.code}-${Date.now()}`);
-  const [attendees, setAttendees] = useState(0); // Mock for now
+  const [attendees, setAttendees] = useState(0);
+
+  // Poll for attendance count
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const res = await fetch(`/api/attendance/record?sessionCode=${qrValue}`);
+        const data = await res.json();
+        if (data.count !== undefined) {
+          setAttendees(data.count);
+        }
+      } catch (error) {
+        console.error('Error fetching attendance count:', error);
+      }
+    };
+
+    // Initial fetch
+    fetchCount();
+
+    // Poll every 3 seconds
+    const interval = setInterval(fetchCount, 3000);
+    return () => clearInterval(interval);
+  }, [qrValue]);
 
   // Timer Countdown
   useEffect(() => {
