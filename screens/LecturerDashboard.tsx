@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { User, Course } from '../types';
 import { GoogleGenAI } from "@google/genai";
 import RequestCourseModal from './lecturer/RequestCourseModal';
+import StartAttendanceModal, { AttendanceSettings } from './lecturer/StartAttendanceModal';
+import AttendanceSession from './lecturer/AttendanceSession';
 
 interface LecturerDashboardProps {
   user: User;
@@ -16,6 +18,11 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ user, onLogout, o
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+
+  // Attendance Session State
+  const [showStartModal, setShowStartModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [activeSession, setActiveSession] = useState<{course: Course, settings: AttendanceSettings} | null>(null);
 
   React.useEffect(() => {
     fetchCourses();
@@ -44,6 +51,26 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ user, onLogout, o
     }
   };
 
+  const handleStartAttendanceClick = (course: Course) => {
+    setSelectedCourse(course);
+    setShowStartModal(true);
+  };
+
+  const handleStartSession = (settings: AttendanceSettings) => {
+    if (selectedCourse) {
+      setActiveSession({
+        course: selectedCourse,
+        settings
+      });
+      setShowStartModal(false);
+    }
+  };
+
+  const handleEndSession = () => {
+    setActiveSession(null);
+    setSelectedCourse(null);
+  };
+
   const generateSmartInsights = async () => {
     setIsInsightLoading(true);
     setShowInsights(true);
@@ -60,6 +87,16 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ user, onLogout, o
       setIsInsightLoading(false);
     }
   };
+
+  if (activeSession) {
+    return (
+      <AttendanceSession 
+        course={activeSession.course}
+        settings={activeSession.settings}
+        onEndSession={handleEndSession}
+      />
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden pb-24 bg-slate-50 dark:bg-background-dark max-w-lg mx-auto shadow-xl">
@@ -190,7 +227,7 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ user, onLogout, o
                 </div>
                 
                 <button 
-                  onClick={() => onStartAttendance(course)}
+                  onClick={() => handleStartAttendanceClick(course)}
                   className={`w-full flex items-center justify-center gap-2 h-11 rounded-xl font-bold text-sm transition-all active:scale-[0.98] ${
                     course.isActive 
                       ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:bg-blue-600' 
@@ -216,6 +253,15 @@ const LecturerDashboard: React.FC<LecturerDashboardProps> = ({ user, onLogout, o
           </div>
         </div>
       </main>
+
+      {/* Start Attendance Modal */}
+      {showStartModal && selectedCourse && (
+        <StartAttendanceModal
+          course={selectedCourse}
+          onClose={() => setShowStartModal(false)}
+          onStart={handleStartSession}
+        />
+      )}
 
       {/* Request Course Modal */}
       {showRequestModal && (

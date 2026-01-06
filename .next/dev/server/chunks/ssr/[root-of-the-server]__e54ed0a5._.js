@@ -2120,12 +2120,21 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                 lineNumber: 85,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
+            showStartModal && selectedCourse && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(StartAttendanceModal, {
+                course: selectedCourse,
+                onClose: ()=>setShowStartModal(false),
+                onStart: handleStartSession
+            }, void 0, false, {
+                fileName: "[project]/screens/LecturerDashboard.tsx",
+                lineNumber: 222,
+                columnNumber: 9
+            }, ("TURBOPACK compile-time value", void 0)),
             showRequestModal && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$screens$2f$lecturer$2f$RequestCourseModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
                 user: user,
                 onClose: ()=>setShowRequestModal(false)
             }, void 0, false, {
                 fileName: "[project]/screens/LecturerDashboard.tsx",
-                lineNumber: 222,
+                lineNumber: 231,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -2141,7 +2150,7 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                                     children: "grid_view"
                                 }, void 0, false, {
                                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                                    lineNumber: 232,
+                                    lineNumber: 241,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2149,13 +2158,13 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                                     children: "Dashboard"
                                 }, void 0, false, {
                                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                                    lineNumber: 233,
+                                    lineNumber: 242,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/screens/LecturerDashboard.tsx",
-                            lineNumber: 231,
+                            lineNumber: 240,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2166,7 +2175,7 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                                     children: "history"
                                 }, void 0, false, {
                                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                                    lineNumber: 236,
+                                    lineNumber: 245,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2174,13 +2183,13 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                                     children: "History"
                                 }, void 0, false, {
                                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                                    lineNumber: 237,
+                                    lineNumber: 246,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/screens/LecturerDashboard.tsx",
-                            lineNumber: 235,
+                            lineNumber: 244,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0)),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2191,7 +2200,7 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                                     children: "settings"
                                 }, void 0, false, {
                                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                                    lineNumber: 240,
+                                    lineNumber: 249,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2199,24 +2208,24 @@ const LecturerDashboard = ({ user, onLogout, onStartAttendance })=>{
                                     children: "Settings"
                                 }, void 0, false, {
                                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                                    lineNumber: 241,
+                                    lineNumber: 250,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/screens/LecturerDashboard.tsx",
-                            lineNumber: 239,
+                            lineNumber: 248,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     ]
                 }, void 0, true, {
                     fileName: "[project]/screens/LecturerDashboard.tsx",
-                    lineNumber: 230,
+                    lineNumber: 239,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0))
             }, void 0, false, {
                 fileName: "[project]/screens/LecturerDashboard.tsx",
-                lineNumber: 229,
+                lineNumber: 238,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
