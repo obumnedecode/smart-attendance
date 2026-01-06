@@ -1,0 +1,9 @@
+
+{
+  "name": "Smart Attendance Pro",
+  "description": "A high-fidelity academic attendance tracking system using secure QR codes and GPS geofencing for students and lecturers.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

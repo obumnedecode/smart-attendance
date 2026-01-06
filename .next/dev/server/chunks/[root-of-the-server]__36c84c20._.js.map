@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/User/Downloads/smart-attendance/app/api/auth/logout/route.ts"],"sourcesContent":["import { NextResponse } from 'next/server';\nimport { cookies } from 'next/headers';\n\nexport async function POST() {\n  (await cookies()).delete('token');\n  return NextResponse.json({ message: 'Logged out successfully' });\n}\n"],"names":[],"mappings":";;;;AAAA;AACA;;;AAEO,eAAe;IACpB,CAAC,MAAM,IAAA,4IAAO,GAAE,EAAE,MAAM,CAAC;IACzB,OAAO,gJAAY,CAAC,IAAI,CAAC;QAAE,SAAS;IAA0B;AAChE"}}]
+}
