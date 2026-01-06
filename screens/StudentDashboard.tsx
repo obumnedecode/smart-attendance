@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { User, Course } from '../types';
 import { GoogleGenAI } from "@google/genai";
-import { Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 
 interface StudentDashboardProps {
   user: User;
@@ -13,7 +13,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
   const [isScanning, setIsScanning] = useState(false);
   const [scanMessage, setScanMessage] = useState('');
   const [showScanner, setShowScanner] = useState(false);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
 
   const currentClass: Course = {
     id: 'cs101',
@@ -32,38 +32,43 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
     setShowScanner(true);
   };
 
-  const startScanner = () => {
+  const startScanner = async () => {
     if (scannerRef.current) return;
 
-    const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      rememberLastUsedCamera: true,
-      supportedScanTypes: [Html5QrcodeSupportedFormats.QR_CODE]
-    };
+    try {
+      const scanner = new Html5Qrcode("reader");
+      scannerRef.current = scanner;
 
-    const scanner = new Html5QrcodeScanner("reader", config, false);
-    
-    scanner.render(
-      async (decodedText) => {
-        // Stop scanning immediately on success
-        scanner.clear();
-        scannerRef.current = null;
-        setShowScanner(false);
-        
-        await processAttendance(decodedText, currentClass);
-      },
-      (error) => {
-        // Silence errors to avoid console noise during continuous scanning
-      }
-    );
-
-    scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
+        },
+        async (decodedText) => {
+          // Stop scanning immediately on success
+          await stopScanner();
+          await processAttendance(decodedText, currentClass);
+        },
+        (errorMessage) => {
+          // ignore errors
+        }
+      );
+    } catch (err) {
+      console.error("Error starting scanner:", err);
+      setScanMessage("Camera error");
+      setShowScanner(false);
+    }
   };
 
-  const stopScanner = () => {
+  const stopScanner = async () => {
     if (scannerRef.current) {
-      scannerRef.current.clear();
+      try {
+        await scannerRef.current.stop();
+        scannerRef.current.clear();
+      } catch (err) {
+        console.error("Error stopping scanner:", err);
+      }
       scannerRef.current = null;
     }
     setShowScanner(false);
@@ -114,7 +119,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
     }
     return () => {
       if (scannerRef.current) {
+        scannerRef.current.stop().catch(console.error);
         scannerRef.current.clear();
+        scannerRef.current = null;
       }
     };
   }, [showScanner]);
@@ -157,11 +164,16 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
             className="absolute inset-0 bg-cover bg-center opacity-80 blur-[2px] scale-105" 
             style={{ backgroundImage: `url(${currentClass.imageUrl})` }}
           />
-          <div className="absolute inset-0 bg-black/30" />
+          
+          {/* Scanner Container - Behind the UI overlay */}
+          {showScanner && (
+            <div id="reader" className="absolute inset-0 w-full h-full bg-black z-0"></div>
+          )}
+          
+          {!showScanner && <div className="absolute inset-0 bg-black/30" />}
 
           {/* Scanning Overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-between p-8 z-10">
-            {showScanner && <div id="reader" className="w-full h-full absolute inset-0 bg-black z-20"></div>}
             
             {/* Top Brackets */}
             <div className="w-full flex justify-between">
