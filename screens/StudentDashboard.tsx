@@ -14,6 +14,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
   const [scanMessage, setScanMessage] = useState('');
   const [showScanner, setShowScanner] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentClass: Course = {
     id: 'cs101',
@@ -34,6 +35,14 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
 
   const startScanner = async () => {
     if (scannerRef.current) return;
+
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setScanMessage("Camera not supported");
+        setTimeout(() => setScanMessage(''), 3000);
+        setShowScanner(false);
+        return;
+    }
 
     try {
       const scanner = new Html5Qrcode("reader");
@@ -58,6 +67,35 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
       console.error("Error starting scanner:", err);
       setScanMessage("Camera error");
       setShowScanner(false);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Stop camera if running to avoid conflicts
+    if (scannerRef.current) {
+      await stopScanner();
+    }
+
+    try {
+        setScanMessage('Scanning image...');
+        const html5QrCode = new Html5Qrcode("reader");
+        const decodedText = await html5QrCode.scanFile(file, true);
+        // Clear the temporary scanner
+        html5QrCode.clear();
+        
+        await processAttendance(decodedText, currentClass);
+    } catch (err) {
+        console.error("Error scanning file:", err);
+        setScanMessage("No QR code found");
+        setTimeout(() => setScanMessage(''), 3000);
+    } finally {
+        // Reset file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     }
   };
 
@@ -166,9 +204,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
           />
           
           {/* Scanner Container - Behind the UI overlay */}
-          {showScanner && (
-            <div id="reader" className="absolute inset-0 w-full h-full bg-black z-0"></div>
-          )}
+          <div id="reader" className={`absolute inset-0 w-full h-full bg-black z-0 ${showScanner ? 'block' : 'hidden'}`}></div>
           
           {!showScanner && <div className="absolute inset-0 bg-black/30" />}
 
@@ -203,9 +239,19 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
             {/* Camera Controls */}
             <div className="absolute bottom-6 left-0 w-full flex items-center justify-center gap-8">
                {/* Gallery Button */}
-               <button className="size-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-colors text-white">
+               <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="size-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-colors text-white"
+               >
                   <span className="material-symbols-outlined">image</span>
                </button>
+               <input 
+                  type="file" 
+                  accept="image/*" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  onChange={handleFileUpload} 
+               />
 
                {/* Shutter/Scan Button */}
                <button className="size-16 rounded-full bg-white flex items-center justify-center text-blue-600 shadow-lg hover:scale-105 transition-transform">
