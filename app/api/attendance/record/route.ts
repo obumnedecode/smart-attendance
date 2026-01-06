@@ -15,10 +15,17 @@ export async function GET(req: Request) {
 
   try {
     // Count attendance records for this session
-    // We can also filter by recent timestamps if needed, but sessionCode should be unique enough for now
     const count = await Attendance.countDocuments({ sessionCode });
     
-    return NextResponse.json({ count }, { status: 200 });
+    // If details are requested, fetch the list of students
+    let students = [];
+    if (searchParams.get('includeDetails') === 'true') {
+      students = await Attendance.find({ sessionCode })
+        .select('studentName studentId timestamp')
+        .sort({ timestamp: -1 });
+    }
+
+    return NextResponse.json({ count, students }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

@@ -11,17 +11,27 @@ interface AttendanceSessionProps {
 
 const AttendanceSession: React.FC<AttendanceSessionProps> = ({ course, settings, onEndSession }) => {
   const [timeLeft, setTimeLeft] = useState(settings.duration * 60);
-  const [qrValue, setQrValue] = useState(`${course.code}-${Date.now()}`);
+  // Generate a stable session ID on mount
+  const [sessionId] = useState(`${course.code}-${Date.now()}`);
+  // qrValue is now same as sessionId initially, but we might want to rotate tokens later.
+  // For now, to fix the bug, we keep it stable.
+  const [qrValue, setQrValue] = useState(sessionId);
   const [attendees, setAttendees] = useState(0);
+  const [isSessionEnded, setIsSessionEnded] = useState(false);
+  const [showStudentList, setShowStudentList] = useState(false);
+  const [studentList, setStudentList] = useState<any[]>([]);
 
-  // Poll for attendance count
+  // Poll for attendance count and list
   useEffect(() => {
     const fetchCount = async () => {
       try {
-        const res = await fetch(`/api/attendance/record?sessionCode=${qrValue}`);
+        const res = await fetch(`/api/attendance/record?sessionCode=${sessionId}&includeDetails=${showStudentList}`);
         const data = await res.json();
         if (data.count !== undefined) {
           setAttendees(data.count);
+        }
+        if (data.students) {
+            setStudentList(data.students);
         }
       } catch (error) {
         console.error('Error fetching attendance count:', error);
@@ -31,27 +41,32 @@ const AttendanceSession: React.FC<AttendanceSessionProps> = ({ course, settings,
     // Initial fetch
     fetchCount();
 
-    // Poll every 3 seconds
+    // Poll every 3 seconds if session is active or viewing list
     const interval = setInterval(fetchCount, 3000);
     return () => clearInterval(interval);
-  }, [qrValue]);
+  }, [sessionId, showStudentList]);
 
   // Timer Countdown
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (timeLeft <= 0) {
+        setIsSessionEnded(true);
+        return;
+    }
     const interval = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
     return () => clearInterval(interval);
   }, [timeLeft]);
 
-  // Regenerate QR every 10 seconds for security
+  // Remove automatic rotation for now to ensure stability
+  /*
   useEffect(() => {
     const interval = setInterval(() => {
       setQrValue(`${course.code}-${Date.now()}`);
     }, 10000);
     return () => clearInterval(interval);
   }, [course.code]);
+  */
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -85,9 +100,9 @@ const AttendanceSession: React.FC<AttendanceSessionProps> = ({ course, settings,
         {/* Session Info */}
         <div className="text-center space-y-2">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">{settings.topic}</h2>
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            Accepting Responses
+          <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${isSessionEnded ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            <div className={`w-2 h-2 rounded-full ${isSessionEnded ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></div>
+            {isSessionEnded ? 'Session Ended' : 'Accepting Responses'}
           </div>
         </div>
 
@@ -107,19 +122,28 @@ const AttendanceSession: React.FC<AttendanceSessionProps> = ({ course, settings,
         {/* QR Code Card */}
         <div className="bg-white dark:bg-slate-800 p-8 rounded-[2rem] shadow-lg flex flex-col items-center gap-6">
           <div className="relative bg-white p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg z-10">
-                 <span className="material-symbols-outlined text-slate-900 text-2xl">school</span>
-              </div>
-            </div>
-            <QRCode
-              size={200}
-              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-              value={qrValue}
-              viewBox={`0 0 256 256`}
-            />
+            {isSessionEnded ? (
+                <div className="w-[200px] h-[200px] bg-slate-100 flex flex-col items-center justify-center rounded-xl text-slate-400">
+                    <span className="material-symbols-outlined text-4xl mb-2">lock_clock</span>
+                    <span className="text-xs font-bold uppercase">Time Expired</span>
+                </div>
+            ) : (
+                <>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg z-10">
+                     <span className="material-symbols-outlined text-slate-900 text-2xl">school</span>
+                  </div>
+                </div>
+                <QRCode
+                  size={200}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  value={qrValue}
+                  viewBox={`0 0 256 256`}
+                />
+                </>
+            )}
           </div>
-          <p className="text-sm font-medium text-slate-400">Scan with camera to check in</p>
+          <p className="text-sm font-medium text-slate-400">{isSessionEnded ? 'Attendance is closed' : 'Scan with camera to check in'}</p>
         </div>
 
         {/* Stats Row */}
@@ -140,10 +164,51 @@ const AttendanceSession: React.FC<AttendanceSessionProps> = ({ course, settings,
           </div>
         </div>
 
-        <button className="w-full py-3 bg-white dark:bg-slate-800 rounded-xl text-slate-900 dark:text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <button 
+            onClick={() => setShowStudentList(true)}
+            className="w-full py-3 bg-white dark:bg-slate-800 rounded-xl text-slate-900 dark:text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 border border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+        >
             <span className="material-symbols-outlined">visibility</span>
             View Students
         </button>
+
+        {/* Student List Modal */}
+        {showStudentList && (
+            <div className="absolute inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col animate-in slide-in-from-bottom">
+                <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <h2 className="font-bold text-lg text-slate-900 dark:text-white">Attendees ({studentList.length})</h2>
+                    <button 
+                        onClick={() => setShowStudentList(false)}
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                    >
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                    {studentList.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                            <span className="material-symbols-outlined text-4xl mb-2">person_off</span>
+                            <p>No students have checked in yet</p>
+                        </div>
+                    ) : (
+                        studentList.map((student, index) => (
+                            <div key={index} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl">
+                                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
+                                    {student.studentName?.charAt(0) || '?'}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">{student.studentName}</h4>
+                                    <p className="text-xs text-slate-500">{student.studentId}</p>
+                                </div>
+                                <div className="ml-auto text-xs font-mono text-slate-400">
+                                    {new Date(student.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        )}
 
         {/* GPS Status Card */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">

@@ -181,10 +181,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ user, onLogout, onS
 
       <div className="flex-1 flex flex-col items-center px-6 pb-6">
         {/* Course Banner */}
-        <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">location_on</span>
-            {currentClass.code} - {currentClass.name.toUpperCase()}
-        </div>
+        
 
         {/* Title */}
         <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 text-center">Scan for Attendance</h2>
